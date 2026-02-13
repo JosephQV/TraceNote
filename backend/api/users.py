@@ -7,11 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 import jwt
 from jwt.exceptions import InvalidTokenError
 
-from api_schemas import UserBase
-from api.auth import oauth2_scheme
-from config import JWT_ALGORITHM, JWT_SECRET_KEY
-from api_schemas import TokenData
-from services.users import get_user
+from ..api_schemas import UserBase, TokenData
+from ..api.auth import oauth2_scheme
+from ..config import JWT_ALGORITHM, JWT_SECRET_KEY
+from ..services.users import get_user
 
 
 router_users = APIRouter(

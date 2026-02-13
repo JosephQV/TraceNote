@@ -6,8 +6,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 
 from .users import get_current_user
-from services.posts import get_all_posts_for_user
-from api_schemas import UserBase
+from ..services.posts import get_all_posts_for_user
+from ..api_schemas import UserBase
 
 
 router_posts = APIRouter(

@@ -3,8 +3,8 @@ from datetime import datetime, timezone, timedelta
 from pwdlib import PasswordHash
 import jwt
 
-from services.users import get_user
-from config import JWT_ALGORITHM, JWT_SECRET_KEY
+from ..services.users import get_user
+from ..config import JWT_ALGORITHM, JWT_SECRET_KEY
 
 
 password_hash = PasswordHash.recommended()
