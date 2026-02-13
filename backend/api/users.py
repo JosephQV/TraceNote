@@ -7,10 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 import jwt
 from jwt.exceptions import InvalidTokenError
 
-from ..api_schemas import UserBase, TokenData
+from ..api_schemas import UserBase, UserInput, UserOutput, TokenData
 from ..api.auth import oauth2_scheme
 from ..config import JWT_ALGORITHM, JWT_SECRET_KEY
-from ..services.users import get_user
+from ..services.users import get_user, add_user
 
 
 router_users = APIRouter(
@@ -42,5 +42,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 @router_users.get("/me")
 async def read_users_me(current_user: Annotated[UserBase, Depends(get_current_user)]):
     return current_user
+
+
+@router_users.post("/signup")
+async def create_user(new_user: UserInput) -> UserOutput:
+    add_user(new_user.model_dump())
+    return UserOutput(**new_user.model_dump())
 
 

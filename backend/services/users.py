@@ -1,9 +1,11 @@
+from ..db.session import users_collection
 
+
+def add_user(user_dict):
+    users_collection.insert_one(user_dict)
 
 
 def get_user(username):
-    # retrieve user record from DB using username as key field
-    # can use user_id instead?
-    pass
+    users_collection.find_one({'username': username})
 
 
