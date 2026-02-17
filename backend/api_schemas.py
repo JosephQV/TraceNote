@@ -1,7 +1,9 @@
 #
 # Schemas (Pydantic models) for the API
 #
-from pydantic import BaseModel, UUID8, EmailStr, Field, PastDatetime
+import datetime
+
+from pydantic import BaseModel, UUID4, EmailStr, Field, AwareDatetime
 from typing import Annotated, Literal, List, Tuple
 
 
@@ -27,19 +29,26 @@ class UserInput(UserBase):
 
 # The schema for a user object when it is outputted (sent in a response)
 class UserOutput(UserBase):
-    pass
+    user_id: UUID4
+    profile_id: UUID4 | None = None
+    is_admin: bool = False
+    is_verified: bool = False
+    account_status: Literal["enabled", "suspended"] = "enabled"
+    created_datetime: AwareDatetime
+    last_login_datetime: AwareDatetime = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
+    friend_user_ids: Annotated[List[UUID4], Field(min_length=0, max_length=300)] = []
 
 # The schema for a user object when it is in the database (all attributes)
 class UserStored(UserBase):
-    user_id: UUID8
-    profile_id: UUID8 | None = None
+    user_id: UUID4
+    profile_id: UUID4 | None = None
     hashed_password: str
     is_admin: bool = False
     is_verified: bool = False
-    account_status: Literal["enabled", "suspended"]
-    created_datetime: PastDatetime
-    last_login_datetime: PastDatetime
-    friend_user_ids: Annotated[List[UUID8], Field(min_length=0, max_length=300)] = []
+    account_status: Literal["enabled", "suspended"] = "enabled"
+    created_datetime: AwareDatetime
+    last_login_datetime: AwareDatetime = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
+    friend_user_ids: Annotated[List[UUID4], Field(min_length=0, max_length=300)] = []
 
 
 # *** POST ENTITY TYPE ***
@@ -47,31 +56,27 @@ class UserStored(UserBase):
 class PostBase(BaseModel):
     text: Annotated[str, Field(min_length=0, max_length=1000)]
     created_location: Tuple[float, float]
-    created_datetime: PastDatetime
-    expiration_datetime: PastDatetime
-    last_edited_datetime: PastDatetime
     tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] = []
-
-class PostInput(PostBase):
-    pass
-
-class PostOutput(PostBase):
-    pass
+    availability_radius: int
+    availability_timespan: int
 
 class PostStored(PostBase):
-    post_id: UUID8
-    author_id: UUID8
+    post_id: UUID4
+    author_id: UUID4
+    created_datetime: AwareDatetime
+    last_edited_datetime: AwareDatetime | None = None
+    expiration_datetime: AwareDatetime
     like_count: int = 0
     status: Literal["active", "archived", "deleted"] = "active"
-    post_visibility: Literal["default", "private", "public"] = "default"
-    comment_ids: Annotated[List[UUID8], Field(...)] = []
+    post_visibility: Literal["default", "private", "public"]
+    comment_ids: Annotated[List[UUID4], Field(...)] = []
 
 
 # *** COMMENT ENTITY TYPE ***
 
 class CommentBase(BaseModel):
     text: Annotated[str, Field(min_length=1, max_length=1000)]
-    created_datetime: PastDatetime
+    created_datetime: AwareDatetime
 
 class CommentInput(CommentBase):
     pass
@@ -80,9 +85,9 @@ class CommentOutput(CommentBase):
     pass
 
 class CommentStored(CommentBase):
-    comment_id: UUID8
-    post_id: UUID8
-    author_id: UUID8
+    comment_id: UUID4
+    post_id: UUID4
+    author_id: UUID4
     like_count: int = 0
 
 
@@ -98,10 +103,10 @@ class ProfileOutput(ProfileBase):
     pass
 
 class ProfileStored(ProfileBase):
-    profile_id: UUID8
-    user_id: UUID8
-    created_datetime: PastDatetime
-    last_updated_datetime: PastDatetime
+    profile_id: UUID4
+    user_id: UUID4
+    created_datetime: AwareDatetime
+    last_updated_datetime: AwareDatetime
 
 
 # *** REPORT ENTITY TYPE ***
@@ -116,14 +121,14 @@ class ReportOutput(ReportBase):
     pass
 
 class ReportStored(ReportBase):
-    report_id: UUID8
+    report_id: UUID4
     author_type: Literal["user", "auto"]
-    author_user_id: UUID8 | None = None
+    author_user_id: UUID4 | None = None
     subject: Literal["profile", "post", "comment"]
-    subject_profile_id: UUID8 | None = None
-    subject_post_id: UUID8 | None = None
-    subject_comment_id: UUID8 | None = None
-    created_datetime: PastDatetime
+    subject_profile_id: UUID4 | None = None
+    subject_post_id: UUID4 | None = None
+    subject_comment_id: UUID4 | None = None
+    created_datetime: AwareDatetime
     category: Literal["advertising-spam", "hate speech", "bullying", "inappropriate content"]
     reason: Annotated[str, Field(min_length=6, max_length=1000)]
     status: Literal["submitted", "action taken", "no action taken"]
@@ -141,11 +146,11 @@ class FriendRequestOutput(FriendRequestBase):
     pass
 
 class FriendRequestStored(FriendRequestBase):
-    sending_user_id: UUID8
-    receiving_user_id: UUID8
-    request_id: UUID8
+    sending_user_id: UUID4
+    receiving_user_id: UUID4
+    request_id: UUID4
     status: Literal["sent", "accepted", "rejected"] = "sent"
-    created_date: PastDatetime
+    created_date: AwareDatetime
 
 
 # Other
@@ -155,4 +160,4 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    username: str | None = None
+    username: str

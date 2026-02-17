@@ -7,13 +7,13 @@ from datetime import timedelta
 from fastapi import Depends, APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from ..services.auth import authenticate_user, create_access_token
+from ..services.users import authenticate_user, create_access_token, update_last_login
 from ..api_schemas import Token
-from ..config import ACCESS_TOKEN_EXPIRE_MINUTES
+from ..creds import ACCESS_TOKEN_EXPIRE_MINUTES
 
 
 router_auth = APIRouter(
-    prefix="/auth",
+    prefix="",
     tags=["auth"],
     # dependencies=[Depends(get_token_header)],
     # responses={404: {"description": "Not found"}},
@@ -38,4 +38,5 @@ async def login_for_access_token(
         data={"sub": form_data.username},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
+    update_last_login(form_data.username)
     return Token(access_token=access_token, token_type="bearer")
