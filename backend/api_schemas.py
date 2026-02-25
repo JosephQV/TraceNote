@@ -12,7 +12,7 @@ from typing import Annotated, Literal, List, Tuple
 # TODO: how to link media to post and profile attributes?
 
 # notes for current implementation:
-# comments cannot be edited or have replies
+# Comments cannot be edited or have replies
 
 
 # *** USER ENTITY TYPE ***
@@ -37,6 +37,7 @@ class UserOutput(UserBase):
     created_datetime: AwareDatetime
     last_login_datetime: AwareDatetime = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
     friend_user_ids: Annotated[List[UUID4], Field(min_length=0, max_length=300)] = []
+    liked_post_ids: Annotated[List[UUID4], Field(...)] = []
 
 # The schema for a user object when it is in the database (all attributes)
 class UserStored(UserBase):
@@ -49,6 +50,7 @@ class UserStored(UserBase):
     created_datetime: AwareDatetime
     last_login_datetime: AwareDatetime = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
     friend_user_ids: Annotated[List[UUID4], Field(min_length=0, max_length=300)] = []
+    liked_post_ids: Annotated[List[UUID4], Field(...)] = []
 
 
 # *** POST ENTITY TYPE ***
@@ -60,6 +62,13 @@ class PostBase(BaseModel):
     availability_radius: int
     availability_timespan: int
 
+class PostUpdate(BaseModel):
+    post_id: UUID4
+    text: Annotated[str, Field(min_length=0, max_length=1000)]
+    tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] = []
+    availability_radius: int
+    availability_timespan: int
+
 class PostStored(PostBase):
     post_id: UUID4
     author_id: UUID4
@@ -67,7 +76,7 @@ class PostStored(PostBase):
     last_edited_datetime: AwareDatetime | None = None
     expiration_datetime: AwareDatetime
     like_count: int = 0
-    status: Literal["active", "archived", "deleted"] = "active"
+    status: Literal["active", "archived"] = "active"
     post_visibility: Literal["default", "private", "public"]
     comment_ids: Annotated[List[UUID4], Field(...)] = []
 
