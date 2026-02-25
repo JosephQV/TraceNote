@@ -6,6 +6,7 @@ argon2-cffi-bindings==25.1.0
 certifi==2026.1.4
 cffi==2.0.0
 click==8.3.1
+colorama==0.4.6
 dnspython==2.8.0
 email-validator==2.3.0
 fastapi==0.129.0
@@ -37,10 +38,12 @@ rich==14.3.2
 rich-toolkit==0.19.4
 rignore==0.7.6
 sentry-sdk==2.52.0
+shellingham==1.5.4
 starlette==0.52.1
 typer==0.23.0
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 urllib3==2.6.3
 uvicorn==0.40.0
+watchfiles==1.1.1
 websockets==16.0
