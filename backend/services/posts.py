@@ -5,8 +5,8 @@ import math
 
 from pydantic import UUID4
 
-from ..api_schemas import UserStored, PostBase, PostStored, PostUpdate
-from ..db.session import users_collection, posts_collection
+from api_schemas import UserStored, PostBase, PostStored, PostUpdate
+from db.session import users_collection, posts_collection
 
 
 def add_post(new_post: PostBase, user: UserStored) -> PostStored:

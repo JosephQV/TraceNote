@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 
-from backend import creds
-from .api.auth import router_auth
-from .api.users import router_users
-from .api.posts import router_posts
-from .db.session import db_client
-from .api_schemas import UserBase
+import creds
+from api.auth import router_auth
+from api.users import router_users
+from api.posts import router_posts
+from db.session import db_client
+from api_schemas import UserBase
 
 
 app = FastAPI()

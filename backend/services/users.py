@@ -3,9 +3,9 @@ import datetime
 import jwt
 from pwdlib import PasswordHash
 
-from ..db.session import users_collection
-from ..api_schemas import UserBase, UserInput, UserOutput, UserStored
-from ..creds import JWT_ALGORITHM, JWT_SECRET_KEY
+from db.session import users_collection
+from api_schemas import UserBase, UserInput, UserOutput, UserStored
+from creds import JWT_ALGORITHM, JWT_SECRET_KEY
 
 
 password_hash = PasswordHash.recommended()

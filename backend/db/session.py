@@ -2,7 +2,7 @@ import pathlib
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from ..creds import MONGO_USER, MONGO_PASSWORD
+from creds import MONGO_USER, MONGO_PASSWORD
     
 
 uri = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@trace.rdifolj.mongodb.net/?appName=Trace"

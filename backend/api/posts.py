@@ -7,7 +7,7 @@ from pydantic import UUID4
 from fastapi import APIRouter, Depends, HTTPException
 
 from .users import get_current_user
-from ..services.posts import (
+from services.posts import (
     get_post,
     get_all_posts_for_user, 
     add_post, 
@@ -16,7 +16,7 @@ from ..services.posts import (
     increment_post_likes, 
     retrieve_posts_near_location
 )
-from ..api_schemas import UserStored, PostStored, PostBase, PostUpdate
+from api_schemas import UserStored, PostStored, PostBase, PostUpdate
 
 
 router_posts = APIRouter(
