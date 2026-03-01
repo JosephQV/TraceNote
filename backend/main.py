@@ -1,5 +1,6 @@
 import os
 
+import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -31,3 +32,12 @@ app.add_middleware(SessionMiddleware, secret_key=os.getenv("JWT_SECRET_KEY", "de
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+
+if __name__ == '__main__':
+    uvicorn.run(
+        app,
+        host='0.0.0.0',
+        port=8080,
+        proxy_headers=True
+    )
