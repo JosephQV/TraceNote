@@ -5,11 +5,11 @@ import math
 
 from pydantic import UUID4
 
-from api_schemas import UserStored, PostBase, PostStored, PostUpdate
-from db.session import users_collection, posts_collection
+from api_schemas import UserStored, PostStored, PostUpdate, PostInput
+from database import users_collection, posts_collection
 
 
-def add_post(new_post: PostBase, user: UserStored) -> PostStored:
+def add_post(new_post: PostInput, user: UserStored) -> PostStored:
     created_datetime_ = datetime.datetime.now(datetime.timezone.utc)
     new_stored_post = PostStored(
         **new_post.model_dump(), 
@@ -24,12 +24,13 @@ def add_post(new_post: PostBase, user: UserStored) -> PostStored:
 
 
 def update_post(post_update: PostUpdate) -> PostStored:
-    posts_collection.update_one(
+    updated_post = posts_collection.find_one_and_update(
         filter={"post_id": post_update.post_id},
-        update={"$set": post_update.model_dump()},
+        update={"$set": post_update.model_dump(exclude={"post_id"}, exclude_none=True, exclude_unset=True)},
+        return_document=True
     )
-    updated_post = get_post(post_update.post_id)
-    return updated_post
+    assert updated_post is not None
+    return PostStored(**updated_post)
 
 
 def delete_post(post_id: UUID4):
@@ -37,10 +38,9 @@ def delete_post(post_id: UUID4):
 
 
 def get_post(post_id: UUID4) -> PostStored:
-    with posts_collection.find({"post_id": post_id}) as cursor:
-        posts = [PostStored(**post) for post in cursor]
-    assert len(posts) != 0, f"POST with post_id '{post_id}' not found."
-    return posts[0]
+    record = posts_collection.find_one({"post_id": post_id})
+    assert record is not None, f"POST with post_id '{post_id}' not found"
+    return PostStored(**record)
 
 
 def get_all_posts_for_user(user: UserStored) -> list[PostStored]:
@@ -49,19 +49,31 @@ def get_all_posts_for_user(user: UserStored) -> list[PostStored]:
     return posts
 
 
-def increment_post_likes(post_id: str, liking_user: UserStored) -> PostStored:
-    assert post_id not in liking_user.liked_post_ids
-    like_post_result = posts_collection.update_one(
-        filter={"post_id": UUID4(post_id)},
-        update={"$inc": {"like_count": 1}} # increment likes by 1
-    )
-    user_likes_result = users_collection.update_one(
-        filter={"user_id": liking_user.user_id},
-        update={"$push": {"liked_post_ids": post_id}}
-    )
-    # print(like_post_result)
-    # print(user_likes_result)
-    return get_post(UUID4(post_id))
+def increment_post_likes(post_id: UUID4, liking_user: UserStored, decrement: bool = False) -> PostStored:
+    if decrement == True:
+        assert post_id in liking_user.liked_post_ids
+        liked_post = posts_collection.find_one_and_update(
+            filter={"post_id": post_id},
+            update={"$inc": {"like_count": -1}}, # decrement likes by 1
+            return_document=True
+        )
+        users_collection.update_one(
+            filter={"user_id": liking_user.user_id},
+            update={"$pullAll": {"liked_post_ids": post_id}}
+        )
+    else:
+        assert post_id not in liking_user.liked_post_ids
+        liked_post = posts_collection.find_one_and_update(
+            filter={"post_id": post_id},
+            update={"$inc": {"like_count": 1}}, # increment likes by 1
+            return_document=True
+        )
+        users_collection.update_one(
+            filter={"user_id": liking_user.user_id},
+            update={"$push": {"liked_post_ids": post_id}}
+        )
+    assert liked_post is not None # not currently handled separate from other cases
+    return PostStored(**liked_post)
 
 
 def retrieve_posts_near_location(latitude: float, longitude: float) -> list[PostStored]:
@@ -77,3 +89,13 @@ def retrieve_posts_near_location(latitude: float, longitude: float) -> list[Post
             if distance < post["availability_radius"]:
                 nearby_posts.append(PostStored(**post))
     return nearby_posts
+
+
+def add_media_object_key_to_post(post_id: UUID4, media_object_key: str) -> PostStored:
+    updated_post = posts_collection.find_one_and_update(
+        filter={"post_id": post_id},
+        update={"$set": {"media_object_key": media_object_key}},
+        return_document=True
+    )
+    assert updated_post is not None
+    return PostStored(**updated_post)

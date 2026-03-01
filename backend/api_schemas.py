@@ -16,46 +16,53 @@ from typing import Annotated, Literal, List, Tuple
 
 
 # *** USER ENTITY TYPE ***
-
-# The base schema for a user object
-class UserBase(BaseModel):
+# The schema for a user object when it is inputted (received in a request)
+class UserInput(BaseModel):
     username: Annotated[str, Field(min_length=3, max_length=30)]
     email: EmailStr
     account_visibility: Literal["default", "private", "public"] = "default"
-
-# The schema for a user object when it is inputted (received in a request)
-class UserInput(UserBase):
     password: Annotated[str, Field(min_length=6, max_length=30)]
 
 # The schema for a user object when it is outputted (sent in a response)
-class UserOutput(UserBase):
+class UserOutput(BaseModel):
+    username: Annotated[str, Field(min_length=3, max_length=30)]
+    email: EmailStr
+    account_visibility: Literal["default", "private", "public"] = "default"
     user_id: UUID4
-    profile_id: UUID4 | None = None
-    is_admin: bool = False
     is_verified: bool = False
     account_status: Literal["enabled", "suspended"] = "enabled"
     created_datetime: AwareDatetime
+    last_edited_datetime: AwareDatetime | None = None
     last_login_datetime: AwareDatetime = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
     friend_user_ids: Annotated[List[UUID4], Field(min_length=0, max_length=300)] = []
     liked_post_ids: Annotated[List[UUID4], Field(...)] = []
+    bio_text: Annotated[str, Field(min_length=0, max_length=1000)] = ""
+    media_object_key: str | None = None
+
+class UserUpdate(BaseModel):
+    bio_text: Annotated[str, Field(min_length=0, max_length=1000)] | None = None
+    account_visibility: Literal["default", "private", "public"] | None = None
 
 # The schema for a user object when it is in the database (all attributes)
-class UserStored(UserBase):
+class UserStored(BaseModel):
+    username: Annotated[str, Field(min_length=3, max_length=30)]
+    email: EmailStr
+    account_visibility: Literal["default", "private", "public"] = "default"
     user_id: UUID4
-    profile_id: UUID4 | None = None
     hashed_password: str
-    is_admin: bool = False
     is_verified: bool = False
     account_status: Literal["enabled", "suspended"] = "enabled"
     created_datetime: AwareDatetime
+    last_edited_datetime: AwareDatetime | None = None
     last_login_datetime: AwareDatetime = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
     friend_user_ids: Annotated[List[UUID4], Field(min_length=0, max_length=300)] = []
     liked_post_ids: Annotated[List[UUID4], Field(...)] = []
+    bio_text: Annotated[str, Field(min_length=0, max_length=1000)] = ""
+    media_object_key: str | None = None
 
 
 # *** POST ENTITY TYPE ***
-
-class PostBase(BaseModel):
+class PostInput(BaseModel):
     text: Annotated[str, Field(min_length=0, max_length=1000)]
     created_location: Tuple[float, float]
     tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] = []
@@ -64,14 +71,20 @@ class PostBase(BaseModel):
 
 class PostUpdate(BaseModel):
     post_id: UUID4
+    text: Annotated[str, Field(min_length=0, max_length=1000)] | None = None
+    tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] | None = None
+    availability_radius: int | None = None
+    availability_timespan: int | None = None
+
+class PostStored(BaseModel):
     text: Annotated[str, Field(min_length=0, max_length=1000)]
+    created_location: Tuple[float, float]
     tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] = []
     availability_radius: int
     availability_timespan: int
-
-class PostStored(PostBase):
     post_id: UUID4
     author_id: UUID4
+    media_object_key: str | None = None
     created_datetime: AwareDatetime
     last_edited_datetime: AwareDatetime | None = None
     expiration_datetime: AwareDatetime
@@ -82,54 +95,17 @@ class PostStored(PostBase):
 
 
 # *** COMMENT ENTITY TYPE ***
-
-class CommentBase(BaseModel):
+class CommentStored(BaseModel):
     text: Annotated[str, Field(min_length=1, max_length=1000)]
     created_datetime: AwareDatetime
-
-class CommentInput(CommentBase):
-    pass
-
-class CommentOutput(CommentBase):
-    pass
-
-class CommentStored(CommentBase):
     comment_id: UUID4
     post_id: UUID4
     author_id: UUID4
     like_count: int = 0
 
 
-# *** PROFILE ENTITY TYPE ***
-
-class ProfileBase(BaseModel):
-    bio: Annotated[str, Field(min_length=0, max_length=1000)]
-
-class ProfileInput(ProfileBase):
-    pass
-
-class ProfileOutput(ProfileBase):
-    pass
-
-class ProfileStored(ProfileBase):
-    profile_id: UUID4
-    user_id: UUID4
-    created_datetime: AwareDatetime
-    last_updated_datetime: AwareDatetime
-
-
 # *** REPORT ENTITY TYPE ***
-
-class ReportBase(BaseModel):
-    pass
-
-class ReportInput(ReportBase):
-    pass
-
-class ReportOutput(ReportBase):
-    pass
-
-class ReportStored(ReportBase):
+class ReportStored(BaseModel):
     report_id: UUID4
     author_type: Literal["user", "auto"]
     author_user_id: UUID4 | None = None
@@ -144,17 +120,7 @@ class ReportStored(ReportBase):
 
 
 # *** FRIEND_REQUEST ENTITY TYPE ***
-
-class FriendRequestBase(BaseModel):
-    pass
-
-class FriendRequestInput(FriendRequestBase):
-    pass
-
-class FriendRequestOutput(FriendRequestBase):
-    pass
-
-class FriendRequestStored(FriendRequestBase):
+class FriendRequestStored(BaseModel):
     sending_user_id: UUID4
     receiving_user_id: UUID4
     request_id: UUID4
@@ -162,8 +128,7 @@ class FriendRequestStored(FriendRequestBase):
     created_date: AwareDatetime
 
 
-# Other
-
+# *** OTHER ***
 class Token(BaseModel):
     access_token: str
     token_type: str
