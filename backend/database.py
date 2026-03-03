@@ -4,12 +4,17 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import boto3
 
-from config import MONGO_USER, MONGO_PASSWORD, AWS_BUCKET_NAME
+from config import MONGO_USER, MONGO_PASSWORD, AWS_BUCKET_NAME, IAM_ACCESS_KEY, IAM_SECRET_ACCESS_KEY
     
 
 mongodb_uri = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@trace.rdifolj.mongodb.net/?appName=Trace"
 
-s3_client = boto3.client('s3')
+s3_client = boto3.client(
+    's3',
+    aws_access_key_id=IAM_ACCESS_KEY,
+    aws_secret_access_key=IAM_SECRET_ACCESS_KEY,
+    region_name='us-east-1'
+)
 
 
 # Create a new client and connect to the server

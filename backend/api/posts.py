@@ -141,3 +141,11 @@ async def get_accessible_posts(
         elif post.author_id in current_user.friend_user_ids:
             visible.append(post)
     return visible
+
+
+# @router_posts.get("/accessible_posts_from_user")
+# async def get_accessible_posts_from_user(
+#         current_user: Annotated[UserStored, Depends(get_current_user)],
+#         user_id: UUID4,
+# ):
+#     pass

@@ -8,8 +8,6 @@ from typing import Annotated, Literal, List, Tuple
 
 
 # TODO: where is uniqueness specified?
-# TODO: how to organize input/output/stored model attributes?
-# TODO: how to link media to post and profile attributes?
 
 # notes for current implementation:
 # Comments cannot be edited or have replies
@@ -67,21 +65,21 @@ class PostInput(BaseModel):
     created_location: Tuple[float, float]
     tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] = []
     availability_radius: int
-    availability_timespan: int
+    availability_timespan: Tuple[float, float]
 
 class PostUpdate(BaseModel):
     post_id: UUID4
     text: Annotated[str, Field(min_length=0, max_length=1000)] | None = None
     tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] | None = None
     availability_radius: int | None = None
-    availability_timespan: int | None = None
+    availability_timespan: Tuple[float, float] | None = None
 
 class PostStored(BaseModel):
     text: Annotated[str, Field(min_length=0, max_length=1000)]
     created_location: Tuple[float, float]
     tags: Annotated[List[Literal['nature', 'art', 'event', 'music', 'travel', 'science', 'sports', 'cars', 'exercise', 'health']], Field(min_length=0, max_length=3)] = []
     availability_radius: int
-    availability_timespan: int
+    availability_timespan: Tuple[float, float]
     post_id: UUID4
     author_id: UUID4
     media_object_key: str | None = None

@@ -30,7 +30,7 @@ def update_post(post_update: PostUpdate) -> PostStored:
         return_document=True
     )
     assert updated_post is not None
-    return PostStored(**updated_post)
+    return updated_post
 
 
 def delete_post(post_id: UUID4):
@@ -99,3 +99,17 @@ def add_media_object_key_to_post(post_id: UUID4, media_object_key: str) -> PostS
     )
     assert updated_post is not None
     return PostStored(**updated_post)
+
+
+def archive_old_posts() -> list[UUID4]:
+    archived_post_ids = []
+    with posts_collection.find() as cursor:
+        for post in cursor:
+            post = PostStored(**post)
+            if post.expiration_datetime < datetime.datetime.now(tz=datetime.timezone.utc):
+                archived_post_ids.append(post.post_id)
+    posts_collection.update_many(
+        filter={'post_id': archived_post_ids},
+        update={'$set': {'status': 'archived'}}
+    )
+    return archived_post_ids

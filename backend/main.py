@@ -9,6 +9,7 @@ from api.auth import router_auth
 from api.users import router_users
 from api.posts import router_posts
 from database import db_client, get_s3_media_url
+from config import ENV_MODE
 
 
 db = db_client.Trace
@@ -49,7 +50,7 @@ async def get_media_url(object_key: str):
 if __name__ == '__main__':
     uvicorn.run(
         app,
-        host='0.0.0.0',
+        host='0.0.0.0' if ENV_MODE == 'prod' else '127.0.0.1',
         port=8080,
         proxy_headers=True
     )
