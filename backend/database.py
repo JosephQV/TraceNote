@@ -1,13 +1,12 @@
-import pathlib
-
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import boto3
 
-from config import MONGO_USER, MONGO_PASSWORD, AWS_BUCKET_NAME, IAM_ACCESS_KEY, IAM_SECRET_ACCESS_KEY
+from config import AWS_BUCKET_NAME, IAM_ACCESS_KEY, IAM_SECRET_ACCESS_KEY
     
 
-mongodb_uri = f"mongodb+srv://{MONGO_USER}:{MONGO_PASSWORD}@trace.rdifolj.mongodb.net/?appName=Trace"
+mongodb_uri = "mongodb+srv://trace.rdifolj.mongodb.net/?authSource=%24external&authMechanism=MONGODB-AWS&appName=Trace"
+
 
 s3_client = boto3.client(
     's3',
