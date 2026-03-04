@@ -7,13 +7,12 @@ from config import AWS_BUCKET_NAME, IAM_ACCESS_KEY, IAM_SECRET_ACCESS_KEY
 
 mongodb_uri = "mongodb+srv://trace.rdifolj.mongodb.net/?authSource=%24external&authMechanism=MONGODB-AWS&appName=Trace"
 
-
-s3_client = boto3.client(
-    's3',
+session = boto3.Session(
     aws_access_key_id=IAM_ACCESS_KEY,
     aws_secret_access_key=IAM_SECRET_ACCESS_KEY,
     region_name='us-east-1'
 )
+s3_client = session.client("s3")
 
 
 # Create a new client and connect to the server
