@@ -45,3 +45,4 @@ uvicorn[standard]
 websockets==16.0
 itsdangerous
 boto3
+pymongo[aws]
