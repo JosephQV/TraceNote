@@ -41,3 +41,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+# other (this section added manually)
+set_env.ps1
+.venv
